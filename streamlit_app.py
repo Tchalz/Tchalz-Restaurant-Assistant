@@ -133,10 +133,28 @@ h1 {
     text-transform: uppercase;
 }
 
-.stChatInput textarea, .stChatInput input {
+[data-testid="stChatInput"],
+[data-testid="stChatInputContainer"],
+[data-testid="stBottomBlockContainer"] {
+    background-color: #14120F !important;
+}
+
+.stChatInput textarea, .stChatInput input,
+[data-testid="stChatInput"] textarea,
+[data-testid="stChatInput"] input {
     background-color: rgba(176,141,87,0.06) !important;
     border: 1px solid rgba(176,141,87,0.35) !important;
     color: #E8E2D6 !important;
+    -webkit-text-fill-color: #E8E2D6 !important;
+    -webkit-appearance: none !important;
+    caret-color: #E8E2D6 !important;
+}
+
+.stChatInput textarea::placeholder, .stChatInput input::placeholder,
+[data-testid="stChatInput"] textarea::placeholder,
+[data-testid="stChatInput"] input::placeholder {
+    color: rgba(232,226,214,0.5) !important;
+    -webkit-text-fill-color: rgba(232,226,214,0.5) !important;
 }
 
 .stButton button {
