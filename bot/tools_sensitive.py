@@ -10,7 +10,8 @@ from bot.currency import format_price, get_currency_from_config
 
 
 @tool
-def create_reservation(name: str, date: str, time: str, party_size: int, contact: str) -> str:
+def create_reservation(name: str, date: str, time: str, party_size: int, contact: str,
+                        config: RunnableConfig = None) -> str:
     """
     Creates a table reservation. Only use this after confirming availability with check_table_availability.
     Use this tool when a customer wants to actually book a table.
@@ -32,7 +33,8 @@ def create_reservation(name: str, date: str, time: str, party_size: int, contact
     if not valid:
         return err
     try:
-        res_id = db.create_reservation(name, date, time, int(party_size), contact)
+        session_id = config["configurable"]["thread_id"] if config else None
+        res_id = db.create_reservation(name, date, time, int(party_size), contact, session_id=session_id)
         return f"Reservation confirmed! ID: {res_id} for {name}, party of {party_size}, on {date} at {time}."
     except Exception as e:
         return f"Error creating reservation: {str(e)}"

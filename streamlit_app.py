@@ -377,14 +377,33 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "pending_interrupt" not in st.session_state:
     st.session_state.pending_interrupt = None  # holds tool_calls while paused for approval
+if "currency" not in st.session_state:
+    st.session_state.currency = "USD"
 
-config = {"configurable": {"thread_id": st.session_state.thread_id}}
+config = {
+    "configurable": {
+        "thread_id": st.session_state.thread_id,
+        "currency": st.session_state.currency,
+    }
+}
 
 
 # ---- Sidebar ----
 with st.sidebar:
     st.header("🍽️ Tchalz Restaurant")
     st.caption(f"Session: `{st.session_state.thread_id[:8]}`")
+
+    currency_options = {"USD": "$ US Dollar", "NGN": "₦ Nigerian Naira", "GBP": "£ British Pound", "EUR": "€ Euro"}
+    selected_currency = st.selectbox(
+        "Currency",
+        options=list(currency_options.keys()),
+        format_func=lambda code: currency_options[code],
+        index=list(currency_options.keys()).index(st.session_state.currency),
+    )
+    if selected_currency != st.session_state.currency:
+        st.session_state.currency = selected_currency
+        st.rerun()
+
     if st.button("Start new conversation"):
         st.session_state.thread_id = str(uuid.uuid4())
         st.session_state.chat_history = []

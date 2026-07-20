@@ -13,14 +13,6 @@ def get_connection():
     return conn
 
 
-def _ensure_column(conn, table, column, coltype):
-    """Adds a column to an existing table if it isn't already there (simple migration)."""
-    cols = [row[1] for row in conn.execute(f"PRAGMA table_info({table})")]
-    if column not in cols:
-        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {coltype}")
-        conn.commit()
-
-
 def init_db():
     conn = get_connection()
     conn.execute("""
@@ -35,7 +27,13 @@ def init_db():
             status TEXT DEFAULT 'confirmed'
         )
     """)
-    _ensure_column(conn, "reservations", "session_id", "TEXT")
+    # Migration: add session_id to any pre-existing reservations table that predates this column
+    try:
+        conn.execute("ALTER TABLE reservations ADD COLUMN session_id TEXT")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass  # column already exists
+
     conn.execute("""
         CREATE TABLE IF NOT EXISTS orders (
             id TEXT PRIMARY KEY,
@@ -86,20 +84,20 @@ def create_reservation(name, date, time, party_size, contact, session_id=None):
     return res_id
 
 
+def get_reservation(res_id):
+    conn = get_connection()
+    row = conn.execute("SELECT * FROM reservations WHERE id = ?", (res_id,)).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
 def get_reservation_by_session(session_id):
-    """Returns the most recently touched reservation for a chat session, or None."""
+    """Returns the most recent reservation made in this session, or None if there isn't one."""
     conn = get_connection()
     row = conn.execute(
         "SELECT * FROM reservations WHERE session_id = ? ORDER BY rowid DESC LIMIT 1",
         (session_id,),
     ).fetchone()
-    conn.close()
-    return dict(row) if row else None
-
-
-def get_reservation(res_id):
-    conn = get_connection()
-    row = conn.execute("SELECT * FROM reservations WHERE id = ?", (res_id,)).fetchone()
     conn.close()
     return dict(row) if row else None
 
