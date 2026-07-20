@@ -6,11 +6,11 @@ from langchain_core.runnables import RunnableConfig
 
 from bot import db
 from bot.validators import validate_date, validate_party_size, validate_contact
+from bot.currency import format_price, get_currency_from_config
 
 
 @tool
-def create_reservation(name: str, date: str, time: str, party_size: int, contact: str,
-                        config: RunnableConfig = None) -> str:
+def create_reservation(name: str, date: str, time: str, party_size: int, contact: str) -> str:
     """
     Creates a table reservation. Only use this after confirming availability with check_table_availability.
     Use this tool when a customer wants to actually book a table.
@@ -32,8 +32,7 @@ def create_reservation(name: str, date: str, time: str, party_size: int, contact
     if not valid:
         return err
     try:
-        session_id = config["configurable"]["thread_id"] if config else None
-        res_id = db.create_reservation(name, date, time, int(party_size), contact, session_id=session_id)
+        res_id = db.create_reservation(name, date, time, int(party_size), contact)
         return f"Reservation confirmed! ID: {res_id} for {name}, party of {party_size}, on {date} at {time}."
     except Exception as e:
         return f"Error creating reservation: {str(e)}"
@@ -141,6 +140,7 @@ def checkout_order(delivery_or_pickup: str, contact: str, config: RunnableConfig
     if delivery_or_pickup.lower() not in ("delivery", "pickup"):
         return "Please specify 'delivery' or 'pickup'."
     try:
+        currency = get_currency_from_config(config)
         session_id = config["configurable"]["thread_id"] if config else "default"
         cart_rows = db.get_cart(session_id)
         if not cart_rows:
@@ -163,7 +163,7 @@ def checkout_order(delivery_or_pickup: str, contact: str, config: RunnableConfig
         db.clear_cart(session_id)
 
         return (
-            f"Order placed! ID: {order_id}. Subtotal: ${subtotal:.2f}. "
+            f"Order placed! ID: {order_id}. Subtotal: {format_price(subtotal, currency)}. "
             f"Type: {delivery_or_pickup}. Estimated ready time: {eta}."
         )
     except Exception as e:

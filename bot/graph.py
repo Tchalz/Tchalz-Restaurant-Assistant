@@ -28,6 +28,8 @@ Reservation flow:
 - If no table is available, offer to add the customer to the waitlist with join_waitlist.
 
 Always use the allergen tool for any allergy-related question instead of guessing.
+Prices returned by tools are already formatted in the customer's selected currency —
+repeat them exactly as given, don't convert, reformat, or add a different symbol.
 Be warm, concise, and professional, in keeping with Tchalz Restaurant's hospitality."""
 
 ALL_TOOLS = SAFE_TOOLS + SENSITIVE_TOOLS

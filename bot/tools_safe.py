@@ -9,10 +9,11 @@ from langchain_core.runnables import RunnableConfig
 from bot import db
 from bot.mock_data import MENU, RESTAURANT_HOURS, DAILY_SPECIALS
 from bot.validators import validate_date, validate_party_size
+from bot.currency import format_price, get_currency_from_config
 
 
 @tool
-def search_menu(query: str = "", dietary_filter: str = "") -> str:
+def search_menu(query: str = "", dietary_filter: str = "", config: RunnableConfig = None) -> str:
     """
     Searches the menu by item name, category, or dietary requirement.
     Use this tool when a customer asks what food or drinks are available.
@@ -22,6 +23,7 @@ def search_menu(query: str = "", dietary_filter: str = "") -> str:
         dietary_filter: Optional filter, one of 'vegan', 'vegetarian', 'gluten_free'
     """
     try:
+        currency = get_currency_from_config(config)
         results = MENU
         if query:
             q = query.lower()
@@ -33,7 +35,7 @@ def search_menu(query: str = "", dietary_filter: str = "") -> str:
             results = [i for i in results if i.get(key)]
         if not results:
             return "No menu items matched your search."
-        lines = [f"{i['name']} - ${i['price']:.2f} ({i['category']})" for i in results]
+        lines = [f"{i['name']} - {format_price(i['price'], currency)} ({i['category']})" for i in results]
         return "Here are the matching items:\n" + "\n".join(lines)
     except Exception as e:
         return f"Error searching menu: {str(e)}"
@@ -62,15 +64,16 @@ def check_allergen_info(item_name: str) -> str:
 
 
 @tool
-def check_daily_specials() -> str:
+def check_daily_specials(config: RunnableConfig = None) -> str:
     """
     Returns today's special menu items and promotions.
     Use this tool when a customer asks about specials, deals, or what's new today.
     """
     try:
+        currency = get_currency_from_config(config)
         if not DAILY_SPECIALS:
             return "There are no specials today."
-        lines = [f"{s['name']} - ${s['price']:.2f}: {s['description']}" for s in DAILY_SPECIALS]
+        lines = [f"{s['name']} - {format_price(s['price'], currency)}: {s['description']}" for s in DAILY_SPECIALS]
         return "Today's specials:\n" + "\n".join(lines)
     except Exception as e:
         return f"Error fetching specials: {str(e)}"
@@ -128,7 +131,7 @@ def check_table_availability(date: str, time: str, party_size: int) -> str:
 
 
 @tool
-def get_order_status(order_id: str) -> str:
+def get_order_status(order_id: str, config: RunnableConfig = None) -> str:
     """
     Checks the current status of a previously placed order.
     Use this tool when a customer asks where their order is or if it's ready.
@@ -137,12 +140,13 @@ def get_order_status(order_id: str) -> str:
         order_id: The order ID, e.g. 'ORD1234'
     """
     try:
+        currency = get_currency_from_config(config)
         order = db.get_order(order_id)
         if not order:
             return f"No order found with ID {order_id}."
         return (
             f"Order {order_id} ({order['order_type']}): status is '{order['status']}', "
-            f"subtotal ${order['subtotal']:.2f}, estimated ready at {order['eta']}."
+            f"subtotal {format_price(order['subtotal'], currency)}, estimated ready at {order['eta']}."
         )
     except Exception as e:
         return f"Error checking order status: {str(e)}"
@@ -157,6 +161,7 @@ def view_cart(config: RunnableConfig = None) -> str:
     to confirm everything is correct.
     """
     try:
+        currency = get_currency_from_config(config)
         session_id = config["configurable"]["thread_id"] if config else "default"
         items = db.get_cart(session_id)
         if not items:
@@ -168,8 +173,8 @@ def view_cart(config: RunnableConfig = None) -> str:
             mod_str = f" ({', '.join(modifiers)})" if modifiers else ""
             line_total = item["unit_price"] * item["quantity"]
             total += line_total
-            lines.append(f"{item['quantity']}x {item['item_name']}{mod_str} - ${line_total:.2f}")
-        lines.append(f"\nSubtotal: ${total:.2f}")
+            lines.append(f"{item['quantity']}x {item['item_name']}{mod_str} - {format_price(line_total, currency)}")
+        lines.append(f"\nSubtotal: {format_price(total, currency)}")
         return "\n".join(lines)
     except Exception as e:
         return f"Error viewing cart: {str(e)}"
