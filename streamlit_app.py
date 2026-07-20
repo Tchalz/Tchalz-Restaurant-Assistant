@@ -188,6 +188,56 @@ h1 {
     background-color: rgba(176,141,87,0.1) !important;
 }
 
+.tchalz-gallery-wrap {
+    position: relative;
+}
+
+.tchalz-swipe-hint {
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #B08D57;
+    margin-bottom: 6px;
+}
+
+.tchalz-swipe-hint svg {
+    animation: tchalz-swipe-nudge 1.4s ease-in-out infinite;
+}
+
+@keyframes tchalz-swipe-nudge {
+    0%, 100% { transform: translateX(0); opacity: 0.6; }
+    50% { transform: translateX(4px); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .tchalz-swipe-hint {
+        display: flex;
+    }
+    .tchalz-gallery-wrap::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 10px;
+        width: 36px;
+        background: linear-gradient(to right, rgba(20,18,15,0), #14120F 85%);
+        pointer-events: none;
+    }
+    .tchalz-gallery::-webkit-scrollbar {
+        height: 5px;
+    }
+    .tchalz-gallery::-webkit-scrollbar-thumb {
+        background: rgba(176,141,87,0.75);
+    }
+    .tchalz-gallery::-webkit-scrollbar-track {
+        background: rgba(176,141,87,0.15);
+    }
+}
+
 .tchalz-gallery {
     display: flex;
     gap: 16px;
@@ -195,6 +245,8 @@ h1 {
     padding-bottom: 10px;
     margin-bottom: 8px;
     scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(176,141,87,0.6) rgba(176,141,87,0.1);
 }
 
 .tchalz-gallery::-webkit-scrollbar {
@@ -526,7 +578,13 @@ with center_col:
                 f'</div>'
             )
 
-        st.markdown(f'<div class="tchalz-gallery">{tiles_html}</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="tchalz-swipe-hint">Swipe '
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" '
+            'stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></div>'
+            f'<div class="tchalz-gallery-wrap"><div class="tchalz-gallery">{tiles_html}</div></div>',
+            unsafe_allow_html=True,
+        )
 
     # ---- Render chat history ----
     for msg in st.session_state.chat_history:
