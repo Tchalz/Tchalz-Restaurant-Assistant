@@ -1,6 +1,7 @@
 import base64
 import uuid
 
+import requests
 import streamlit as st
 from langchain_core.messages import HumanMessage
 
@@ -282,11 +283,29 @@ h1 {
     margin: 0;
 }
 
-.tchalz-qr-box {
-    width: 64px;
-    height: 64px;
-    background: #E8E2D6;
-    margin: 0 auto;
+.tchalz-weather {
+    text-align: center;
+}
+
+.tchalz-weather-temp {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    color: #E8E2D6;
+    margin: 4px 0 2px;
+}
+
+.tchalz-weather-desc {
+    font-size: 12px;
+    color: #B08D57;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 4px;
+}
+
+.tchalz-weather-meta {
+    font-size: 11px;
+    color: #8a7c5c;
+    margin: 0;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -356,6 +375,44 @@ def render_bubble(role: str, content: str):
         )
 
 
+RESTAURANT_LAT = 6.4531   # Marina Rd, Lagos
+RESTAURANT_LON = 3.3958
+
+WEATHER_CODES = {
+    0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+    45: "Fog", 48: "Fog", 51: "Light drizzle", 53: "Drizzle", 55: "Heavy drizzle",
+    61: "Light rain", 63: "Rain", 65: "Heavy rain", 66: "Freezing rain",
+    67: "Freezing rain", 71: "Light snow", 73: "Snow", 75: "Heavy snow",
+    80: "Rain showers", 81: "Rain showers", 82: "Violent showers",
+    95: "Thunderstorm", 96: "Thunderstorm", 99: "Thunderstorm",
+}
+
+
+@st.cache_data(ttl=600)
+def get_current_weather(lat: float, lon: float):
+    """Fetches live weather from Open-Meteo (free, no API key). Cached for 10 minutes."""
+    try:
+        resp = requests.get(
+            "https://api.open-meteo.com/v1/forecast",
+            params={
+                "latitude": lat,
+                "longitude": lon,
+                "current_weather": "true",
+                "temperature_unit": "celsius",
+            },
+            timeout=5,
+        )
+        resp.raise_for_status()
+        current = resp.json()["current_weather"]
+        return {
+            "temp_c": round(current["temperature"]),
+            "condition": WEATHER_CODES.get(current["weathercode"], "Unknown"),
+            "windspeed": round(current["windspeed"]),
+        }
+    except Exception:
+        return None
+
+
 def render_left_panel():
     st.markdown(
         """
@@ -370,13 +427,33 @@ def render_left_panel():
             <p>&#128205; 12 Marina Rd, Lagos</p>
             <p>&#128222; +234 801 234 5678</p>
         </div>
-        <div class="tchalz-panel" style="text-align:center;">
-            <div class="tchalz-panel-title">Menu QR</div>
-            <div class="tchalz-qr-box"></div>
-        </div>
         """,
         unsafe_allow_html=True,
     )
+
+    weather = get_current_weather(RESTAURANT_LAT, RESTAURANT_LON)
+    if weather:
+        st.markdown(
+            f"""
+            <div class="tchalz-panel tchalz-weather">
+                <div class="tchalz-panel-title">Weather in Lagos</div>
+                <div class="tchalz-weather-temp">{weather['temp_c']}&deg;C</div>
+                <div class="tchalz-weather-desc">{weather['condition']}</div>
+                <p class="tchalz-weather-meta">Wind {weather['windspeed']} km/h</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown(
+            """
+            <div class="tchalz-panel tchalz-weather">
+                <div class="tchalz-panel-title">Weather</div>
+                <p style="color:#8a7c5c;font-size:12px;">Unavailable right now</p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_right_panel():
