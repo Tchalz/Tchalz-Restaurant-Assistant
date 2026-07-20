@@ -148,6 +148,26 @@ h1 {
     -webkit-text-fill-color: #E8E2D6 !important;
     -webkit-appearance: none !important;
     caret-color: #E8E2D6 !important;
+    color-scheme: dark !important;
+    box-shadow: 0 0 0 30px #14120F inset !important;
+    outline: none !important;
+}
+
+.stChatInput textarea:focus, .stChatInput input:focus,
+[data-testid="stChatInput"] textarea:focus,
+[data-testid="stChatInput"] input:focus {
+    border: 1px solid #B08D57 !important;
+    box-shadow: 0 0 0 30px #14120F inset !important;
+    outline: none !important;
+}
+
+.stChatInput textarea:-webkit-autofill,
+.stChatInput input:-webkit-autofill,
+[data-testid="stChatInput"] textarea:-webkit-autofill,
+[data-testid="stChatInput"] input:-webkit-autofill {
+    -webkit-text-fill-color: #E8E2D6 !important;
+    -webkit-box-shadow: 0 0 0 30px #14120F inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .stChatInput textarea::placeholder, .stChatInput input::placeholder,
