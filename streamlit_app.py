@@ -9,6 +9,8 @@ from bot import db
 from bot.graph import build_graph
 from bot.mock_data import CATEGORY_IMAGES
 
+CURRENCY_OPTIONS = {"USD": "$ US Dollar", "NGN": "₦ Nigerian Naira", "GBP": "£ British Pound", "EUR": "€ Euro"}
+
 st.set_page_config(page_title="Tchalz Restaurant", page_icon="🍽️", layout="wide")
 
 st.markdown("""
@@ -186,6 +188,26 @@ h1 {
 
 .stButton button:hover {
     background-color: rgba(176,141,87,0.1) !important;
+}
+
+.tchalz-currency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 auto 1.2rem;
+    padding: 4px 14px;
+    border: 1px solid rgba(176,141,87,0.4);
+    border-radius: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #B08D57;
+    width: fit-content;
+}
+
+.tchalz-currency-badge-row {
+    display: flex;
+    justify-content: center;
 }
 
 .tchalz-gallery-wrap {
@@ -393,12 +415,11 @@ with st.sidebar:
     st.header("🍽️ Tchalz Restaurant")
     st.caption(f"Session: `{st.session_state.thread_id[:8]}`")
 
-    currency_options = {"USD": "$ US Dollar", "NGN": "₦ Nigerian Naira", "GBP": "£ British Pound", "EUR": "€ Euro"}
     selected_currency = st.selectbox(
         "Currency",
-        options=list(currency_options.keys()),
-        format_func=lambda code: currency_options[code],
-        index=list(currency_options.keys()).index(st.session_state.currency),
+        options=list(CURRENCY_OPTIONS.keys()),
+        format_func=lambda code: CURRENCY_OPTIONS[code],
+        index=list(CURRENCY_OPTIONS.keys()).index(st.session_state.currency),
     )
     if selected_currency != st.session_state.currency:
         st.session_state.currency = selected_currency
@@ -580,6 +601,12 @@ with center_col:
 
     st.title("Tchalz Restaurant Assistant")
     st.caption("Reservations · Table Service · Counter Service")
+    st.markdown(
+        f'<div class="tchalz-currency-badge-row">'
+        f'<div class="tchalz-currency-badge">Prices shown in {CURRENCY_OPTIONS[st.session_state.currency]}</div>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
     st.markdown('<div class="tchalz-divider">Concierge</div>', unsafe_allow_html=True)
 
     # ---- Menu category gallery (horizontally scrollable) ----
