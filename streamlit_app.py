@@ -21,6 +21,14 @@ html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
 }
 
+/* Tell the browser itself (not just Streamlit) that this page is dark,
+   so mobile Chrome/Safari render any native form-control chrome — chat
+   input wrappers, autofill bars, etc. — in dark mode instead of falling
+   back to light-mode defaults that Streamlit's own CSS doesn't reach. */
+:root {
+    color-scheme: dark;
+}
+
 .stApp {
     background-color: #14120F;
     color: #E8E2D6;
@@ -399,6 +407,17 @@ h1 {
     background-color: #14120F !important;
     border: 1px solid rgba(176,141,87,0.35) !important;
     border-radius: 10px !important;
+}
+
+/* Fallback: mobile Streamlit sometimes wraps the chat input in extra
+   layout divs that don't carry the specific testids above (this varies
+   across Streamlit versions/browsers). Force every descendant of the
+   bottom-pinned area to the app background, then let the more specific
+   textarea/input rules above win on the actual control itself. */
+[data-testid="stBottom"] div,
+[data-testid="stChatInputContainer"] div,
+[data-testid="stBottomBlockContainer"] div {
+    background-color: #14120F !important;
 }
 </style>
 """, unsafe_allow_html=True)
