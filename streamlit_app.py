@@ -381,6 +381,25 @@ h1 {
     color: #8a7c5c;
     margin: 0;
 }
+
+/* Streamlit's fixed bottom container (which now holds the chat input, since
+   it's called outside any column) defaults to a light background regardless
+   of the app's dark theme. Force it to match. */
+[data-testid="stBottom"],
+[data-testid="stBottomBlockContainer"],
+[data-testid="stAppScrollToBottomContainer"] {
+    background-color: #14120F !important;
+}
+
+[data-testid="stBottom"] > div {
+    background-color: #14120F !important;
+}
+
+[data-testid="stChatInput"] {
+    background-color: #14120F !important;
+    border: 1px solid rgba(176,141,87,0.35) !important;
+    border-radius: 10px !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -636,38 +655,42 @@ with center_col:
     for msg in st.session_state.chat_history:
         render_bubble(msg["role"], msg["content"])
 
-    # ---- Approval flow (if a sensitive tool is pending) ----
-    if st.session_state.pending_interrupt:
-        st.markdown('<div class="tchalz-label">Tchalz</div>', unsafe_allow_html=True)
-        st.warning("This action needs your approval before it happens:")
-        for call in st.session_state.pending_interrupt:
-            st.write(f"**Action:** `{call['name']}`")
-            st.json(call["args"])
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("✅ Approve", use_container_width=True):
-                run_graph(None)
-                st.rerun()
-        with col2:
-            if st.button("❌ Reject", use_container_width=True):
-                graph.update_state(
-                    config,
-                    {"messages": [HumanMessage(content="I changed my mind, please cancel that action.")]},
-                )
-                run_graph(None)
-                st.rerun()
 
-    # ---- Normal chat input (disabled while an approval is pending) ----
-    else:
-        user_input = st.chat_input("Type your message...")
-        if user_input:
-            st.session_state.chat_history.append({"role": "user", "content": user_input})
-            render_bubble("user", user_input)
+# ---- Approval flow + chat input: kept OUTSIDE any column/container ----
+# so Streamlit's native "pin chat_input to the bottom of the page" behavior
+# actually applies. Nesting chat_input inside st.columns() disables that
+# pinning and makes it render inline instead — which is what was pushing it
+# far down the page on mobile.
+if st.session_state.pending_interrupt:
+    st.markdown('<div class="tchalz-label">Tchalz</div>', unsafe_allow_html=True)
+    st.warning("This action needs your approval before it happens:")
+    for call in st.session_state.pending_interrupt:
+        st.write(f"**Action:** `{call['name']}`")
+        st.json(call["args"])
 
-            with st.spinner("Thinking..."):
-                run_graph({"messages": [HumanMessage(content=user_input)]})
-
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("✅ Approve", use_container_width=True):
+            run_graph(None)
+            st.rerun()
+    with col2:
+        if st.button("❌ Reject", use_container_width=True):
+            graph.update_state(
+                config,
+                {"messages": [HumanMessage(content="I changed my mind, please cancel that action.")]},
+            )
+            run_graph(None)
             st.rerun()
 
-    st.markdown('</div>', unsafe_allow_html=True)
+else:
+    user_input = st.chat_input("Type your message...")
+    if user_input:
+        st.session_state.chat_history.append({"role": "user", "content": user_input})
+        render_bubble("user", user_input)
+
+        with st.spinner("Thinking..."):
+            run_graph({"messages": [HumanMessage(content=user_input)]})
+
+        st.rerun()
