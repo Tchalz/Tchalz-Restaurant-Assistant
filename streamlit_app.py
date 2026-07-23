@@ -17,33 +17,14 @@ CURRENCY_OPTIONS = {"USD": "$ US Dollar", "NGN": "â‚¦ Nigerian Naira", "GBP": "Â
 # metallic/highlight color (labels, borders, buttons); "secondary" colors
 # the assistant's chat bubble; "muted" is for de-emphasized text.
 THEMES = {
-    "Noir Gold": {
-        "bg": "#14120F",
-        "sidebar_bg": "#1B1814",
-        "accent": "#B08D57",
-        "secondary": "#123328",
-        "text": "#E8E2D6",
-        "muted": "#8a7c5c",
-        "status_open": "#6FA37C",
-    },
-    "Emerald Noir": {
-        "bg": "#0B1512",
-        "sidebar_bg": "#0F1E19",
-        "accent": "#D4AF37",
-        "secondary": "#0F3D34",
-        "text": "#ECF5EF",
-        "muted": "#6E8F80",
-        "status_open": "#58C48C",
-    },
-    "Burgundy Velvet": {
-        "bg": "#1A0A0D",
-        "sidebar_bg": "#230D11",
-        "accent": "#D98E4A",
-        "secondary": "#3A121F",
-        "text": "#F3E6DA",
-        "muted": "#9C7A6E",
-        "status_open": "#9AB58C",
-    },
+    "Noir Gold":{"bg":"#14120F","sidebar_bg":"#1B1814","accent":"#B08D57","secondary":"#123328","text":"#E8E2D6","muted":"#8A7C5C","status_open":"#6FA37C"},
+    "Emerald Noir":{"bg":"#0B1512","sidebar_bg":"#0F1E19","accent":"#D4AF37","secondary":"#0F3D34","text":"#ECF5EF","muted":"#6E8F80","status_open":"#58C48C"},
+    "Burgundy Velvet":{"bg":"#1A0A0D","sidebar_bg":"#230D11","accent":"#D98E4A","secondary":"#3A121F","text":"#F3E6DA","muted":"#9C7A6E","status_open":"#9AB58C"},
+    "Midnight Sapphire":{"bg":"#0A1224","sidebar_bg":"#101B35","accent":"#4F9DFF","secondary":"#163A73","text":"#F4F8FF","muted":"#8EA8C9","status_open":"#46D37B"},
+    "Royal Emerald":{"bg":"#071711","sidebar_bg":"#0E221A","accent":"#2ECC71","secondary":"#135D43","text":"#F5FFF9","muted":"#8CB5A0","status_open":"#62E59A"},
+    "Imperial Purple":{"bg":"#170B2C","sidebar_bg":"#22103C","accent":"#8B5CF6","secondary":"#5B33A5","text":"#F7F3FF","muted":"#B7A9D4","status_open":"#56E39F"},
+    "Sunset Copper":{"bg":"#20120B","sidebar_bg":"#2D1A10","accent":"#F28C28","secondary":"#8A4F1C","text":"#FFF6EE","muted":"#D2B49C","status_open":"#70D48F"},
+    "Arctic Frost":{"bg":"#EEF3F8","sidebar_bg":"#E1E8F0","accent":"#2979FF","secondary":"#D6E8FF","text":"#1B2A41","muted":"#708090","status_open":"#28A745"},
 }
 
 
